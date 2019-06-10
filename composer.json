@@ -1,0 +1,14 @@
+{
+    "name": "ljoboy/contacts",
+    "description": "Une application de gestion de contact",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jonathan Yombo",
+            "email": "jonathanyombo@gmail.com"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+}
