@@ -1,0 +1,158 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Telephones extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->model('Telephones_model');
+        $this->load->library('form_validation');
+    }
+
+    public function index()
+    {
+        $q = urldecode($this->input->get('q', TRUE));
+        $start = intval($this->input->get('start'));
+        
+        if ($q <> '') {
+            $config['base_url'] = base_url() . 'telephones/index.html?q=' . urlencode($q);
+            $config['first_url'] = base_url() . 'telephones/index.html?q=' . urlencode($q);
+        } else {
+            $config['base_url'] = base_url() . 'telephones/index.html';
+            $config['first_url'] = base_url() . 'telephones/index.html';
+        }
+
+        $config['per_page'] = 10;
+        $config['page_query_string'] = TRUE;
+        $config['total_rows'] = $this->Telephones_model->total_rows($q);
+        $telephones = $this->Telephones_model->get_limit_data($config['per_page'], $start, $q);
+
+        $this->load->library('pagination');
+        $this->pagination->initialize($config);
+
+        $data = array(
+            'telephones_data' => $telephones,
+            'q' => $q,
+            'pagination' => $this->pagination->create_links(),
+            'total_rows' => $config['total_rows'],
+            'start' => $start,
+        );
+        $this->load->view('telephones/telephones_list', $data);
+    }
+
+    public function read($id) 
+    {
+        $row = $this->Telephones_model->get_by_id($id);
+        if ($row) {
+            $data = array(
+		'idPhone' => $row->idPhone,
+		'numero' => $row->numero,
+		'idContact' => $row->idContact,
+	    );
+            $this->load->view('telephones/telephones_read', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('telephones'));
+        }
+    }
+
+    public function create() 
+    {
+        $data = array(
+            'button' => 'Create',
+            'action' => site_url('telephones/create_action'),
+	    'idPhone' => set_value('idPhone'),
+	    'numero' => set_value('numero'),
+	    'idContact' => set_value('idContact'),
+	);
+        $this->load->view('telephones/telephones_form', $data);
+    }
+    
+    public function create_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->create();
+        } else {
+            $data = array(
+		'numero' => $this->input->post('numero',TRUE),
+		'idContact' => $this->input->post('idContact',TRUE),
+	    );
+
+            $this->Telephones_model->insert($data);
+            $this->session->set_flashdata('message', 'Create Record Success');
+            redirect(site_url('telephones'));
+        }
+    }
+    
+    public function update($id) 
+    {
+        $row = $this->Telephones_model->get_by_id($id);
+
+        if ($row) {
+            $data = array(
+                'button' => 'Update',
+                'action' => site_url('telephones/update_action'),
+		'idPhone' => set_value('idPhone', $row->idPhone),
+		'numero' => set_value('numero', $row->numero),
+		'idContact' => set_value('idContact', $row->idContact),
+	    );
+            $this->load->view('telephones/telephones_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('telephones'));
+        }
+    }
+    
+    public function update_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->update($this->input->post('idPhone', TRUE));
+        } else {
+            $data = array(
+		'numero' => $this->input->post('numero',TRUE),
+		'idContact' => $this->input->post('idContact',TRUE),
+	    );
+
+            $this->Telephones_model->update($this->input->post('idPhone', TRUE), $data);
+            $this->session->set_flashdata('message', 'Update Record Success');
+            redirect(site_url('telephones'));
+        }
+    }
+    
+    public function delete($id) 
+    {
+        $row = $this->Telephones_model->get_by_id($id);
+
+        if ($row) {
+            $this->Telephones_model->delete($id);
+            $this->session->set_flashdata('message', 'Delete Record Success');
+            redirect(site_url('telephones'));
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('telephones'));
+        }
+    }
+
+    public function _rules() 
+    {
+	$this->form_validation->set_rules('numero', 'numero', 'trim|required');
+	$this->form_validation->set_rules('idContact', 'idcontact', 'trim|required');
+
+	$this->form_validation->set_rules('idPhone', 'idPhone', 'trim');
+	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    }
+
+}
+
+/* End of file Telephones.php */
+/* Location: ./application/controllers/Telephones.php */
+/* Please DO NOT modify this information : */
+/* Generated by Harviacode Codeigniter CRUD Generator 2019-06-10 21:15:44 */
+/* http://harviacode.com */
