@@ -9,6 +9,9 @@ class Contactsapi extends CI_Controller
     {
         parent::__construct();
         $this->load->model('Contacts_model');
+        $this->load->model('Websites_model');
+        $this->load->model('Telephones_model');
+        $this->load->model('Emails_model');
         $this->load->library('form_validation');
     }
 
@@ -28,8 +31,12 @@ class Contactsapi extends CI_Controller
         $config['per_page'] = 10;
         $config['page_query_string'] = TRUE;
         $config['total_rows'] = $this->Contacts_model->total_rows($q);
-        $contacts = $this->Contacts_model->get_limit_data($config['per_page'], $start, $q);
-
+        $contacts = $this->Contacts_model->get_limit_data_array($config['per_page'], $start, $q);
+		for ($i = 0; $i < count($contacts); $i++){
+			$contacts[$i]['numeros'] = $this->Telephones_model->get_by_idContact($contacts[$i]['idContact']);
+			$contacts[$i]['emails'] = $this->Emails_model->get_by_idContact($contacts[$i]['idContact']);
+			$contacts[$i]['websites'] = $this->Websites_model->get_by_idContact($contacts[$i]['idContact']);
+		}
 		header('Content-Type: application/json');
         echo json_encode($contacts);
     }
