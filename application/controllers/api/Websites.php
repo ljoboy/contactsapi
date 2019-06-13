@@ -1,0 +1,158 @@
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+class Websites extends CI_Controller
+{
+    function __construct()
+    {
+        parent::__construct();
+        $this->load->model('Websites_model');
+        $this->load->library('form_validation');
+    }
+
+    public function index()
+    {
+        $q = urldecode($this->input->get('q', TRUE));
+        $start = intval($this->input->get('start'));
+        
+        if ($q <> '') {
+            $config['base_url'] = base_url() . 'websites/index.html?q=' . urlencode($q);
+            $config['first_url'] = base_url() . 'websites/index.html?q=' . urlencode($q);
+        } else {
+            $config['base_url'] = base_url() . 'websites/index.html';
+            $config['first_url'] = base_url() . 'websites/index.html';
+        }
+
+        $config['per_page'] = 10;
+        $config['page_query_string'] = TRUE;
+        $config['total_rows'] = $this->Websites_model->total_rows($q);
+        $websites = $this->Websites_model->get_limit_data($config['per_page'], $start, $q);
+
+        $this->load->library('pagination');
+        $this->pagination->initialize($config);
+
+        $data = array(
+            'websites_data' => $websites,
+            'q' => $q,
+            'pagination' => $this->pagination->create_links(),
+            'total_rows' => $config['total_rows'],
+            'start' => $start,
+        );
+        $this->load->view('websites/websites_list', $data);
+    }
+
+    public function read($id) 
+    {
+        $row = $this->Websites_model->get_by_id($id);
+        if ($row) {
+            $data = array(
+		'idSite' => $row->idSite,
+		'url' => $row->url,
+		'idContact' => $row->idContact,
+	    );
+            $this->load->view('websites/websites_read', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('websites'));
+        }
+    }
+
+    public function create() 
+    {
+        $data = array(
+            'button' => 'Create',
+            'action' => site_url('websites/create_action'),
+	    'idSite' => set_value('idSite'),
+	    'url' => set_value('url'),
+	    'idContact' => set_value('idContact'),
+	);
+        $this->load->view('websites/websites_form', $data);
+    }
+    
+    public function create_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->create();
+        } else {
+            $data = array(
+		'url' => $this->input->post('url',TRUE),
+		'idContact' => $this->input->post('idContact',TRUE),
+	    );
+
+            $this->Websites_model->insert($data);
+            $this->session->set_flashdata('message', 'Create Record Success');
+            redirect(site_url('websites'));
+        }
+    }
+    
+    public function update($id) 
+    {
+        $row = $this->Websites_model->get_by_id($id);
+
+        if ($row) {
+            $data = array(
+                'button' => 'Update',
+                'action' => site_url('websites/update_action'),
+		'idSite' => set_value('idSite', $row->idSite),
+		'url' => set_value('url', $row->url),
+		'idContact' => set_value('idContact', $row->idContact),
+	    );
+            $this->load->view('websites/websites_form', $data);
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('websites'));
+        }
+    }
+    
+    public function update_action() 
+    {
+        $this->_rules();
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->update($this->input->post('idSite', TRUE));
+        } else {
+            $data = array(
+		'url' => $this->input->post('url',TRUE),
+		'idContact' => $this->input->post('idContact',TRUE),
+	    );
+
+            $this->Websites_model->update($this->input->post('idSite', TRUE), $data);
+            $this->session->set_flashdata('message', 'Update Record Success');
+            redirect(site_url('websites'));
+        }
+    }
+    
+    public function delete($id) 
+    {
+        $row = $this->Websites_model->get_by_id($id);
+
+        if ($row) {
+            $this->Websites_model->delete($id);
+            $this->session->set_flashdata('message', 'Delete Record Success');
+            redirect(site_url('websites'));
+        } else {
+            $this->session->set_flashdata('message', 'Record Not Found');
+            redirect(site_url('websites'));
+        }
+    }
+
+    public function _rules() 
+    {
+	$this->form_validation->set_rules('url', 'url', 'trim|required');
+	$this->form_validation->set_rules('idContact', 'idcontact', 'trim|required');
+
+	$this->form_validation->set_rules('idSite', 'idSite', 'trim');
+	$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+    }
+
+}
+
+/* End of file Websites.php */
+/* Location: ./application/controllers/Websites.php */
+/* Please DO NOT modify this information : */
+/* Generated by Harviacode Codeigniter CRUD Generator 2019-06-10 21:15:45 */
+/* http://harviacode.com */
