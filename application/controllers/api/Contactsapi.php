@@ -19,16 +19,17 @@ class Contactsapi extends CI_Controller
     {
         $q = urldecode($this->input->get('q', TRUE));
         $start = intval($this->input->get('start'));
-        
+        $size = intval($this->input->get('size'));
+
         if ($q <> '') {
-            $config['base_url'] = base_url() . 'contacts/index.html?q=' . urlencode($q);
-            $config['first_url'] = base_url() . 'contacts/index.html?q=' . urlencode($q);
+            $config['base_url'] = base_url() . 'api/contactsapi/index.html?q=' . urlencode($q);
+            $config['first_url'] = base_url() . 'api/contactsapi/index.html?q=' . urlencode($q);
         } else {
-            $config['base_url'] = base_url() . 'contacts/index.html';
-            $config['first_url'] = base_url() . 'contacts/index.html';
+            $config['base_url'] = base_url() . 'api/contactsapi/index.html';
+            $config['first_url'] = base_url() . 'api/contactsapi/index.html';
         }
 
-        $config['per_page'] = 10;
+        $config['per_page'] = ($size != 0) ? $size : 10;
         $config['page_query_string'] = TRUE;
         $config['total_rows'] = $this->Contacts_model->total_rows($q);
         $contacts = $this->Contacts_model->get_limit_data_array($config['per_page'], $start, $q);
