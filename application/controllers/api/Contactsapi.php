@@ -85,22 +85,31 @@ class Contactsapi extends CI_Controller
     
     public function create_action() 
     {
+    	header('Content-Type: application/json');
+    	try{
+    		//$post = json_decode($_POST, $assoc = false, $depth = 512, $options = 0);
+			var_dump($_POST);die();
+    		$data = array(
+				'nom' => $this->input->post('nom',TRUE),
+				'postnom' => $this->input->post('postnom',TRUE),
+				'prenom' => $this->input->post('prenom',TRUE),
+				'cree_le' => date('Y-m-d H:i:s'),
+				'etat' => 1,
+				'genre' => $this->input->post('genre',TRUE),
+				'img_url' => $this->input->post('img_url',TRUE),
+			);
+			$this->Contacts_model->insert($data);
+			header("HTTP/1.1 201 Created");
+			echo json_encode(['success' => true]);
+		}catch (Exception $e){
+    		header('HTTP/1.1 404 Not Found');
+    		echo json_encode(['success' => false, 'error' => json_encode($e)]);
+		}
 
-        $this->_rules();
-		$data = array(
-			'nom' => $this->input->post('nom',TRUE),
-			'postnom' => $this->input->post('postnom',TRUE),
-			'prenom' => $this->input->post('prenom',TRUE),
-			'cree_le' => $this->input->post('cree_le',TRUE),
-			'etat' => $this->input->post('etat',TRUE),
-			'genre' => $this->input->post('genre',TRUE),
-			'img_url' => $this->input->post('img_url',TRUE),
-		);
-		$this->Contacts_model->insert($data);
 
-		header('Content-Type: application/json');
-		header("HTTP/1.1 201 Created");
-		echo json_encode(['success' => true]);
+
+
+
     }
     
     public function update($id) 
@@ -167,13 +176,13 @@ class Contactsapi extends CI_Controller
 		$this->form_validation->set_rules('nom', 'nom', 'trim|required');
 		$this->form_validation->set_rules('postnom', 'postnom', 'trim|required');
 		$this->form_validation->set_rules('prenom', 'prenom', 'trim|required');
-		$this->form_validation->set_rules('cree_le', 'cree le', 'trim|required');
-		$this->form_validation->set_rules('etat', 'etat', 'trim|required');
+//		$this->form_validation->set_rules('cree_le', 'cree le', 'trim|required');
+//		$this->form_validation->set_rules('etat', 'etat', 'trim|required');
 		$this->form_validation->set_rules('genre', 'genre', 'trim|required');
 		$this->form_validation->set_rules('img_url', 'img url', 'trim|required');
 
-		$this->form_validation->set_rules('idContact', 'idContact', 'trim');
-		$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
+//		$this->form_validation->set_rules('idContact', 'idContact', 'trim');
+//		$this->form_validation->set_error_delimiters('<span class="text-danger">', '</span>');
     }
 
 }
